@@ -1,20 +1,95 @@
-
-const express = require('express');
-const cors = require('cors');
+const express = require("express");
+const cors = require("cors");
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-app.post('/api/chat', (req, res) => {
-  const msg = (req.body.message || '').toLowerCase();
-  let reply = "I didn't understand.";
+app.post("/api/chat", (req, res) => {
+  const message = req.body.message.toLowerCase();
 
-  if (msg.includes('hello')) reply = "Hi there!";
-  else if (msg.includes('cpu')) reply = "CPU usage is 65% (mock)";
-  else if (msg.includes('memory')) reply = "Memory usage is 70% (mock)";
+  // 1️⃣ Simple Text Response
+  if (message.includes("hello")) {
+    return res.json({
+      type: "text",
+      reply: "Hello! How can I assist you today?"
+    });
+  }
 
-  res.json({ reply });
+  // 2️⃣ CPU Text Response
+  if (message.includes("cpu") && !message.includes("week")) {
+    return res.json({
+      type: "text",
+      reply: "Current CPU usage is 65% (mock)"
+    });
+  }
+
+  // 3️⃣ Chart Response (Last 5 Weeks)
+  if (message.includes("last 5 weeks") || message.includes("weekly")) {
+    return res.json({
+      type: "chart",
+      title: "CPU Usage (Last 5 Weeks)",
+      data: [
+        { week: "Week 1", value: 60 },
+        { week: "Week 2", value: 70 },
+        { week: "Week 3", value: 65 },
+        { week: "Week 4", value: 80 },
+        { week: "Week 5", value: 75 }
+      ]
+    });
+  }
+
+  // 4️⃣ Table Response
+  if (message.includes("table")) {
+    return res.json({
+      type: "table",
+      title: "CPU Usage Table",
+      columns: ["Week", "CPU Usage"],
+      rows: [
+        ["Week 1", "60%"],
+        ["Week 2", "70%"],
+        ["Week 3", "65%"],
+        ["Week 4", "80%"],
+        ["Week 5", "75%"]
+      ]
+    });
+  }
+
+  // 5️⃣ Mixed Response (Text + Chart + Table)
+  if (message.includes("analysis") || message.includes("summary")) {
+    return res.json({
+      type: "mixed",
+      text: "CPU usage increased by 15% over the last 5 weeks.",
+      chart: {
+        title: "CPU Trend",
+        data: [
+          { week: "Week 1", value: 60 },
+          { week: "Week 2", value: 70 },
+          { week: "Week 3", value: 65 },
+          { week: "Week 4", value: 80 },
+          { week: "Week 5", value: 75 }
+        ]
+      },
+      table: {
+        columns: ["Week", "CPU Usage"],
+        rows: [
+          ["Week 1", "60%"],
+          ["Week 2", "70%"],
+          ["Week 3", "65%"],
+          ["Week 4", "80%"],
+          ["Week 5", "75%"]
+        ]
+      }
+    });
+  }
+
+  // Default fallback
+  return res.json({
+    type: "text",
+    reply: "Sorry, I didn’t understand your query."
+  });
 });
 
-app.listen(5000, () => console.log("Backend running on 5000"));
+app.listen(5000, () => {
+  console.log("Server running on http://localhost:5000");
+});

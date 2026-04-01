@@ -1,9 +1,20 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useTheme2, Input, Button } from '@grafana/ui';
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+} from 'recharts';
 
 interface Message {
   sender: 'user' | 'bot';
-  text: string;
+  type?: 'text' | 'chart' | 'table' | 'mixed';
+  text?: string;
+  chart?: any;
+  table?: any;
 }
 
 export const ChatPanel: React.FC = () => {
@@ -13,14 +24,12 @@ export const ChatPanel: React.FC = () => {
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
 
-  // 👇 Ref for auto-scroll
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  // 👇 Auto-scroll when messages or typing changes
   useEffect(() => {
     scrollToBottom();
   }, [messages, isTyping]);
@@ -45,7 +54,10 @@ export const ChatPanel: React.FC = () => {
 
       const botMessage: Message = {
         sender: 'bot',
-        text: data.reply || 'No response',
+        type: data.type,
+        text: data.reply || data.text,
+        chart: data.chart || (data.type === 'chart' ? data : null),
+        table: data.table || (data.type === 'table' ? data : null),
       };
 
       setMessages((prev) => [...prev, botMessage]);
@@ -59,13 +71,70 @@ export const ChatPanel: React.FC = () => {
     }
   };
 
-  // 👇 Enter to send (Shift+Enter optional)
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       sendMessage();
     }
   };
+
+  // 🔹 Render Chart
+  const renderChart = (chartData: any) => (
+    <div style={{ width: '100%', height: '250px' }}>
+      <ResponsiveContainer width="100%" height="100%">
+        <BarChart data={chartData.data}>
+          <XAxis dataKey="week" />
+          <YAxis />
+          <Tooltip />
+          <Bar dataKey="value" />
+        </BarChart>
+      </ResponsiveContainer>
+    </div>
+  );
+
+  // 🔹 Render Table
+  const renderTable = (tableData: any) => (
+    <table
+      style={{
+        width: '100%',
+        borderCollapse: 'collapse',
+        marginTop: 8,
+      }}
+    >
+      <thead>
+        <tr>
+          {tableData.columns.map((col: string, i: number) => (
+            <th
+              key={i}
+              style={{
+                border: `1px solid ${theme.colors.border.weak}`,
+                padding: 6,
+              }}
+            >
+              {col}
+            </th>
+          ))}
+        </tr>
+      </thead>
+      <tbody>
+        {tableData.rows.map((row: any[], i: number) => (
+          <tr key={i}>
+            {row.map((cell, j) => (
+              <td
+                key={j}
+                style={{
+                  border: `1px solid ${theme.colors.border.weak}`,
+                  padding: 6,
+                }}
+              >
+                {cell}
+              </td>
+            ))}
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  );
 
   return (
     <div
@@ -118,59 +187,35 @@ export const ChatPanel: React.FC = () => {
                 maxWidth: '70%',
               }}
             >
-              {msg.text}
+              {/* TEXT */}
+              {msg.text && <div>{msg.text}</div>}
+
+              {/* CHART */}
+              {msg.type === 'chart' && msg.chart && renderChart(msg.chart)}
+
+              {/* TABLE */}
+              {msg.type === 'table' && msg.table && renderTable(msg.table)}
+
+              {/* MIXED */}
+              {msg.type === 'mixed' && (
+                <>
+                  {msg.text && <div>{msg.text}</div>}
+                  {msg.chart && renderChart(msg.chart)}
+                  {msg.table && renderTable(msg.table)}
+                </>
+              )}
             </div>
           </div>
         ))}
 
-        {/* 🔵 Animated Typing Indicator */}
-        {isTyping && (
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'flex-start',
-              marginBottom: theme.spacing(1),
-            }}
-          >
-            <div
-              style={{
-                background: theme.colors.background.primary,
-                border: `1px solid ${theme.colors.border.weak}`,
-                padding: theme.spacing(1),
-                borderRadius: 8,
-                display: 'flex',
-                gap: '4px',
-              }}
-            >
-              {[0, 1, 2].map((dot) => (
-                <span
-                  key={dot}
-                  style={{
-                    width: 6,
-                    height: 6,
-                    borderRadius: '50%',
-                    background: theme.colors.text.secondary,
-                    display: 'inline-block',
-                    animation: `bounce 1.4s infinite ease-in-out`,
-                    animationDelay: `${dot * 0.2}s`,
-                  }}
-                />
-              ))}
-            </div>
-          </div>
-        )}
+        {/* Typing Indicator */}
+        {isTyping && <div>Typing...</div>}
 
-        {/* 👇 Scroll anchor */}
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Input Area */}
-      <div
-        style={{
-          display: 'flex',
-          gap: theme.spacing(1),
-        }}
-      >
+      {/* Input */}
+      <div style={{ display: 'flex', gap: theme.spacing(1) }}>
         <Input
           value={input}
           onChange={(e) => setInput(e.currentTarget.value)}
@@ -179,20 +224,6 @@ export const ChatPanel: React.FC = () => {
         />
         <Button onClick={sendMessage}>Send</Button>
       </div>
-
-      {/* 👇 Animation Styles */}
-      <style>
-        {`
-          @keyframes bounce {
-            0%, 80%, 100% {
-              transform: scale(0);
-            }
-            40% {
-              transform: scale(1);
-            }
-          }
-        `}
-      </style>
     </div>
   );
 };
