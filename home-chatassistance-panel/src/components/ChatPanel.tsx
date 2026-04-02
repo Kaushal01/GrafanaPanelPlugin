@@ -7,6 +7,7 @@ import {
   YAxis,
   Tooltip,
   ResponsiveContainer,
+  Cell,
 } from 'recharts';
 
 interface Message {
@@ -78,19 +79,53 @@ export const ChatPanel: React.FC = () => {
     }
   };
 
+  // 🚦 Smart color based on value
+  const getColor = (value: number) => {
+    if (value > 75) return '#ff4d4f'; // red
+    if (value > 60) return '#ffc658'; // yellow
+    return '#82ca9d'; // green
+  };
+
   // 🔹 Render Chart
-  const renderChart = (chartData: any) => (
-    <div style={{ width: '100%', height: '250px' }}>
-      <ResponsiveContainer width="100%" height="100%">
-        <BarChart data={chartData.data}>
-          <XAxis dataKey="week" />
-          <YAxis />
-          <Tooltip />
-          <Bar dataKey="value" />
-        </BarChart>
-      </ResponsiveContainer>
-    </div>
-  );
+  const renderChart = (chartData: any) => {
+    if (!chartData?.data) return <div>No chart data</div>;
+
+    return (
+      <div style={{ width: '100%', height: '250px' }}>
+        {/* ✅ Chart Title */}
+        {chartData.title && (
+          <div style={{ fontWeight: 600, marginBottom: 6 }}>
+            {chartData.title}
+          </div>
+        )}
+
+        <ResponsiveContainer width="100%" height="100%">
+          <BarChart data={chartData.data}>
+            <XAxis dataKey="week" />
+            <YAxis />
+            <Tooltip />
+
+            <Bar dataKey="value">
+              {chartData.data.map((entry: any, index: number) => (
+                <Cell
+                  key={`cell-${index}`}
+                  fill={
+                    // 👉 Choose one:
+
+                    // OPTION 1: Smart coloring (recommended)
+                    getColor(entry.value)
+
+                    // OPTION 2: Fixed colorful bars
+                    // COLORS[index % COLORS.length]
+                  }
+                />
+              ))}
+            </Bar>
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+    );
+  };
 
   // 🔹 Render Table
   const renderTable = (tableData: any) => (

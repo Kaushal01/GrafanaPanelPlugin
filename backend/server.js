@@ -8,15 +8,15 @@ app.use(express.json());
 app.post("/api/chat", (req, res) => {
   const message = req.body.message.toLowerCase();
 
-  // 1️⃣ Simple Text Response
-  if (message.includes("hello")) {
+  // Greet Simple Text Response
+  if (message.includes("hello") || message.includes("hi")) {
     return res.json({
       type: "text",
       reply: "Hello! How can I assist you today?"
     });
   }
 
-  // 2️⃣ CPU Text Response
+  // CPU Text Response
   if (message.includes("cpu") && !message.includes("week")) {
     return res.json({
       type: "text",
@@ -24,7 +24,7 @@ app.post("/api/chat", (req, res) => {
     });
   }
 
-  // 3️⃣ Chart Response (Last 5 Weeks)
+  // Chart Response (Last 5 Weeks)
   if (message.includes("last 5 weeks") || message.includes("weekly")) {
     return res.json({
       type: "chart",
@@ -39,7 +39,7 @@ app.post("/api/chat", (req, res) => {
     });
   }
 
-  // 4️⃣ Table Response
+  // Table Response
   if (message.includes("table")) {
     return res.json({
       type: "table",
@@ -55,7 +55,7 @@ app.post("/api/chat", (req, res) => {
     });
   }
 
-  // 5️⃣ Mixed Response (Text + Chart + Table)
+  // Mixed Response (Text + Chart + Table)
   if (message.includes("analysis") || message.includes("summary")) {
     return res.json({
       type: "mixed",
