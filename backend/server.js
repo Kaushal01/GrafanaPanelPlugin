@@ -1,95 +1,47 @@
-const express = require("express");
-const cors = require("cors");
+const express = require('express');
+const cors = require('cors');
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-app.post("/api/chat", (req, res) => {
-  const message = req.body.message.toLowerCase();
+// Mock Agent Response
+const mockResponse ={
+    "sessionId": "",
+    "correlationId": "",
+    "requestId": "",
+    "status": "",
+    "agentId": "",
+    "moduleId": "",
+    "userInfo": {
+        "name": "",
+        "email": "",
+        "role": "",
+        "attributes": []
+    },
+    "summarize": true,
+    "response": {
+        "recommended_questions": ["What are the distinct services we have in our system?", "What are the top 5 services by traffic?", "Which services have the most errors?"],
+        "summary": ["below is the list of distinct services we have in our system."],
+        "viz attributes": {},
+        "data": {
+            "sql_query": "SELECT DISTINCT syncx_dev.syncx_observability_tbl.service_name FROM syncx_dev.syncx_observability_tbl WHERE syncx_dev.syncx_observability_tbl.service_name IS NOT NULL;",
+            "response": "{\"schema\":{\"fields\":[{\"name\":\"index\",\"type\":\"integer\"},{\"name\":\"service_name\",\"type\":\"string\"}],\"primaryKey\":[\"index\"],\"pandas_version\":\"1.4.0\"},\"data\":[{\"index\":0,\"service_name\":\"Formulary\"},{\"index\":1,\"service_name\":\"formulary\"},{\"index\":2,\"service_name\":\"business-publisher\"},{\"index\":3,\"service_name\":\"person-publisher\"},{\"index\":4,\"service_name\":\"Formulary-Service\"},{\"index\":5,\"service_name\":\"user-service\"}]}",
+            "table": "{\"schema\":{\"fields\":[{\"name\":\"index\",\"type\":\"integer\"},{\"name\":\"service_name\",\"type\":\"string\"}],\"primaryKey\":[\"index\"],\"pandas_version\":\"1.4.0\"},\"data\":[{\"index\":0,\"service_name\":\"Formulary\"},{\"index\":1,\"service_name\":\"formulary\"},{\"index\":2,\"service_name\":\"business-publisher\"},{\"index\":3,\"service_name\":\"person-publisher\"},{\"index\":4,\"service_name\":\"Formulary-Service\"},{\"index\":5,\"service_name\":\"user-service\"}]}"
+        }
+    },
+    "error": {}
+};
 
-  // Greet Simple Text Response
-  if (message.includes("hello") || message.includes("hi")) {
-    return res.json({
-      type: "text",
-      reply: "Hello! How can I assist you today?"
-    });
-  }
-
-  // CPU Text Response
-  if (message.includes("cpu") && !message.includes("week")) {
-    return res.json({
-      type: "text",
-      reply: "Current CPU usage is 65% (mock)"
-    });
-  }
-
-  // Chart Response (Last 5 Weeks)
-  if (message.includes("last 5 weeks") || message.includes("weekly")) {
-    return res.json({
-      type: "chart",
-      title: "CPU Usage (Last 5 Weeks)",
-      data: [
-        { week: "Week 1", value: 60 },
-        { week: "Week 2", value: 70 },
-        { week: "Week 3", value: 65 },
-        { week: "Week 4", value: 80 },
-        { week: "Week 5", value: 75 }
-      ]
-    });
-  }
-
-  // Table Response
-  if (message.includes("table")) {
-    return res.json({
-      type: "table",
-      title: "CPU Usage Table",
-      columns: ["Week", "CPU Usage"],
-      rows: [
-        ["Week 1", "60%"],
-        ["Week 2", "70%"],
-        ["Week 3", "65%"],
-        ["Week 4", "80%"],
-        ["Week 5", "75%"]
-      ]
-    });
-  }
-
-  // Mixed Response (Text + Chart + Table)
-  if (message.includes("analysis") || message.includes("summary")) {
-    return res.json({
-      type: "mixed",
-      text: "CPU usage increased by 15% over the last 5 weeks.",
-      chart: {
-        title: "CPU Trend",
-        data: [
-          { week: "Week 1", value: 60 },
-          { week: "Week 2", value: 70 },
-          { week: "Week 3", value: 65 },
-          { week: "Week 4", value: 80 },
-          { week: "Week 5", value: 75 }
-        ]
-      },
-      table: {
-        columns: ["Week", "CPU Usage"],
-        rows: [
-          ["Week 1", "60%"],
-          ["Week 2", "70%"],
-          ["Week 3", "65%"],
-          ["Week 4", "80%"],
-          ["Week 5", "75%"]
-        ]
-      }
-    });
-  }
-
-  // Default fallback
-  return res.json({
-    type: "text",
-    reply: "Sorry, I didn’t understand your query."
-  });
+// API Endpoint
+app.post('/api/chat', (req, res) => {
+  console.log('Incoming request:', req.body);
+  setTimeout(() => {
+    res.json(mockResponse);
+  }, 800);
 });
 
+// Start Server
 app.listen(5000, () => {
   console.log("Server running on http://localhost:5000");
 });
