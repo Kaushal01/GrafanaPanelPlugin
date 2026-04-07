@@ -127,14 +127,23 @@ export const ChatPanel: React.FC = () => {
     }
 
     // ================== DEV GRAPH USAGE END ==================
-
+    const payload = {
+      sessionId: "",
+      correlationId: "",
+      requestId: "",
+      requestType: "",
+      question: userMessage.text,
+      moduleId: "Usecase_Syncx_Observability",
+      clientId: "",
+      userInfo: {},
+    };
     try {
       const apiResponse = await fetch(
         'http://localhost:5000/api/chat',
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ message: userMessage.text }),
+          body: JSON.stringify(payload),
         }
       );
 
@@ -388,7 +397,7 @@ export const ChatPanel: React.FC = () => {
                             borderRadius: 14,
                             border: `1px solid ${theme.colors.border.weak}`,
                             background: '#3274d9',
-                              //theme.colors.background.primary,
+                            //theme.colors.background.primary,
                             cursor: 'pointer',
                             fontSize: 12,
                           }}
